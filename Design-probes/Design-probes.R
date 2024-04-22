@@ -22,16 +22,13 @@ raw_16S_seq_process <- function(folder_path){
   #   return()
   # }
   files <- list.files(folder_path, full.names = TRUE) 
-  # suffix_to_remove <- "-final"
   rRNA_seqs <- vector("list", length = length(files))
   names_list <- vector("character", length = length(files))
   for (i in seq_along(files)) {
     file <- files[i]
     sequence <- paste0(readLines(file, warn = FALSE), collapse = "")
     base_name <- file_path_sans_ext(basename(file))
-    #name <- gsub(suffix_to_remove, "", base_name)
     rRNA_seqs[[i]] <- sequence
-    #names_list[i] <- name
     names_list[i] <- base_name
   }
   rRNA_seqs <- DNAStringSet(unlist(rRNA_seqs))
@@ -90,10 +87,8 @@ get_taxonomy_info <- function(input_fasta,taxonkit_path="/home/my8rose/anaconda3
   colnames(lineage_split)[2:8]<- c("kingdom","phylum","class","order","family","genus","species")
   colnames(name_taxid) <- c("identifier","rtaxid")
   merged_data <- merge(name_taxid, lineage_split, by.x = "rtaxid", by.y = "taxid", all.x = TRUE)
-  
   write.table(merged_data, "16S_taxon_info.txt", sep = "\t", row.names = FALSE, quote = FALSE)
   taxon_info <- read.table(file = "./16S_taxon_info.txt",sep = "\t",header = TRUE)
-  
   file.remove("taxid.txt", "lineage.txt", "lineage_temp.txt")
   return(taxon_info)
 }
@@ -121,7 +116,7 @@ process_probes_design_own <- function(input_fasta,
           tblName = "Seqs",
           verbose = TRUE,
           replaceTbl = FALSE,
-          processors = 8)
+          processors = 10)
   tiles <- TileSeqs(con, 
                     add2tbl="Tiles",
                     identifier = "",
@@ -213,7 +208,6 @@ compare_probes_refdatabase <- function(ref_tiles,
   names(hits2) <- rep(1:length(l), l)
   hits <- c(hits1, hits2)
   
-  #Hyb_FA <- 50 
   count <- 0L 
   pBar <- txtProgressBar(style = 3) 
   for (i in 1:dim(probes)[1]) {
