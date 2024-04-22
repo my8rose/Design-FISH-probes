@@ -12,9 +12,6 @@ library(dplyr)
 # Function to load probes data, number them, and write to FASTA files
 numbering_probes <- function(probes_rdata) {
   load(file = probes_rdata)
-  # if (exists("filtered_probes") && !is.null(filtered_probes)) {
-  #   probes <- filtered_probes
-  # }
   if (exists("filtered_probes") && !is.null(filtered_probes)) {
     probes <- filtered_probes
   } else if (exists("fin_probes")) {
@@ -67,7 +64,6 @@ run_blastn <- function(blastn_path,query_blast,db,blast_out,word_size="5",evalue
 xml_extract <- function(blast_xml_file){
   blast_xml <- xmlParse(blast_xml_file)
   hit_nodes <- getNodeSet(blast_xml, "//Iteration")
-  
   blast_info_list <- lapply(hit_nodes, function(node) {
     query_id <- xmlValue(node[["Iteration_query-ID"]])
     hit_nodes <- getNodeSet(node, ".//Hit")
@@ -124,7 +120,6 @@ blast_calculate_eff <- function(blast_info, probes_fasta_path,temp=37,P=100e-9,i
                                      batchSize)
   selected_probe_1 <- probe_1[, 1:2]
   blast_eff <- cbind(blast_info, selected_probe_1)
-
   fasta_data <- readDNAStringSet(probes_fasta_path)
   fasta_df <- data.frame(
     probe_name = names(fasta_data),
@@ -142,7 +137,6 @@ blast_calculate_eff <- function(blast_info, probes_fasta_path,temp=37,P=100e-9,i
                                      ions,   # Na
                                      FA,
                                      batchSize)
-  
   selected_probe_2 <- probe_2[, 1:2]
   colnames(selected_probe_2) <- c("HybEff_alen", "FAm_alen")
   result_df <- cbind(result_df, selected_probe_2)
@@ -177,9 +171,6 @@ process_filtered_results <- function(result_df,max_match = 18,max_HybEff = 1,max
 # Function to merge all probes information
 merged_results <- function(probes_rdata, filtered_df) {
   load(file = probes_rdata)
-  # if (exists("filtered_probes") && !is.null(filtered_probes)) {
-  #   probes <- filtered_probes
-  # }
   if (exists("filtered_probes") && !is.null(filtered_probes)) {
     probes <- filtered_probes
   } else if (exists("fin_probes")) {
@@ -206,7 +197,6 @@ group_results <- function(merged_df) {
 
 # Function to get probes subset with max_eff numbers
 calculate_efficiency_stats <- function(grouped_df) {
-
   grouped_df <- grouped_df %>%
     group_by(identifier) %>%
     summarise(num_probes = n(),
@@ -214,7 +204,6 @@ calculate_efficiency_stats <- function(grouped_df) {
               min_efficiency = min(efficiency, na.rm = TRUE),
               avg_efficiency = mean(efficiency, na.rm = TRUE)) %>%
     mutate(num_probes)
-  
   
   return(grouped_df)
 }
